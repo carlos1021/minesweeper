@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: #c0c0c0;
+            padding: 20px;
+            border: 3px outset #c0c0c0;
+            border-radius: 5px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .face-button {
+            width: 50px;
+            height: 50px;
+            border: 2px outset #c0c0c0;
+            background-color: #c0c0c0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .face-button:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(9, 30px);
+            grid-template-rows: repeat(9, 30px);
+            gap: 1px;
+            background-color: #808080;
+            border: 3px outset #c0c0c0;
+        }
+
+        .tile {
+            width: 30px;
+            height: 30px;
+            border: 2px outset #c0c0c0;
+            background-color: #c0c0c0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .tile:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        .tile.revealed {
+            border: 1px solid #808080;
+            background-color: #c0c0c0;
+        }
+
+        .tile.mine {
+            background-color: #ff0000;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .reset-button {
+            padding: 10px 20px;
+            background-color: #c0c0c0;
+            border: 2px outset #c0c0c0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .reset-button:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        .game-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>💣 Minesweeper</h1>
+    
+    <div class="game-container">
+        <div class="header">
+            <div class="face-button" onclick="resetGame()">
+                <img src="media/face_ingame.png" alt="Face" width="40" height="40">
+            </div>
+        </div>
+        
+        <div class="grid" id="grid"></div>
+        
+        <div class="controls">
+            <button class="reset-button" onclick="resetGame()">Reset Game</button>
+        </div>
+        
+        <div class="game-info">
+            <p>Revealed: <span id="revealed-count">0</span> | Mines: <span id="mine-count">10</span></p>
+            <p id="game-status"></p>
+        </div>
+    </div>
+
+    <script>
+        const GRID_SIZE = 9;
+        const MINE_COUNT = 10;
+        
+        let gameState = {
+            grid: [],
+            mines: new Set(),
+            revealed: new Set(),
+            gameOver: false,
+            firstClick: true
+        };
+
+        // Number images mapping
+        const numberImages = {
+            1: 'media/one.png',
+            2: 'media/two.png',
+            3: 'media/three.png',
+            4: 'media/four.png',
+            5: 'media/five.png',
+            6: 'media/six.png',
+            7: 'media/seven.png',
+            8: 'media/eight.png'
+        };
+
+        function initializeGame() {
+            gameState = {
+                grid: [],
+                mines: new Set(),
+                revealed: new Set(),
+                gameOver: false,
+                firstClick: true
+            };
+            
+            // Initialize empty grid
+            for (let row = 0; row < GRID_SIZE; row++) {
+                gameState.grid[row] = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    gameState.grid[row][col] = 0;
+                }
+            }
+            
+            renderGrid();
+            updateInfo();
+        }
+
+        function createMines(firstRow, firstCol) {
+            const mines = new Set();
+            
+            while (mines.size < MINE_COUNT) {
+                const row = Math.floor(Math.random() * GRID_SIZE);
+                const col = Math.floor(Math.random() * GRID_SIZE);
+                
+                // Avoid placing mine on first click
+                if (row !== firstRow || col !== firstCol) {
+                    mines.add(`${row},${col}`);
+                }
+            }
+            
+            return mines;
+        }
+
+        function countAdjacentMines(row, col) {
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (newRow >= 0 && newRow < GRID_SIZE && 
+                        newCol >= 0 && newCol < GRID_SIZE) {
+                        if (gameState.mines.has(`${newRow},${newCol}`)) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
+        function revealTile(row, col) {
+            if (gameState.gameOver || gameState.revealed.has(`${row},${col}`)) {
+                return;
+            }
+
+            // Place mines on first click
+            if (gameState.firstClick) {
+                gameState.mines = createMines(row, col);
+                gameState.firstClick = false;
+            }
+
+            // Check if clicked on mine
+            if (gameState.mines.has(`${row},${col}`)) {
+                gameState.gameOver = true;
+                gameState.revealed.add(`${row},${col}`);
+                revealAllMines();
+                updateInfo();
+                document.getElementById('game-status').textContent = '💥 Game Over! You hit a mine!';
+                return;
+            }
+
+            // Reveal the tile
+            gameState.revealed.add(`${row},${col}`);
+            
+            // Check for win condition
+            if (gameState.revealed.size === GRID_SIZE * GRID_SIZE - MINE_COUNT) {
+                gameState.gameOver = true;
+                document.getElementById('game-status').textContent = '🎉 Congratulations! You won!';
+            }
+
+            renderGrid();
+            updateInfo();
+        }
+
+        function revealAllMines() {
+            gameState.mines.forEach(mine => {
+                gameState.revealed.add(mine);
+            });
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.onclick = () => revealTile(row, col);
+
+                    const tileKey = `${row},${col}`;
+                    const isRevealed = gameState.revealed.has(tileKey);
+                    const isMine = gameState.mines.has(tileKey);
+
+                    if (isRevealed) {
+                        tile.classList.add('revealed');
+                        
+                        if (isMine) {
+                            tile.classList.add('mine');
+                            tile.textContent = '💣';
+                        } else {
+                            const adjacentMines = countAdjacentMines(row, col);
+                            if (adjacentMines > 0) {
+                                if (numberImages[adjacentMines]) {
+                                    const img = document.createElement('img');
+                                    img.src = numberImages[adjacentMines];
+                                    img.width = 20;
+                                    img.height = 20;
+                                    tile.appendChild(img);
+                                } else {
+                                    tile.textContent = adjacentMines;
+                                }
+                            }
+                        }
+                    }
+
+                    gridElement.appendChild(tile);
+                }
+            }
+        }
+
+        function updateInfo() {
+            document.getElementById('revealed-count').textContent = gameState.revealed.size;
+            document.getElementById('mine-count').textContent = MINE_COUNT;
+        }
+
+        function resetGame() {
+            gameState = {
+                grid: [],
+                mines: new Set(),
+                revealed: new Set(),
+                gameOver: false,
+                firstClick: true
+            };
+            
+            document.getElementById('game-status').textContent = '';
+            initializeGame();
+        }
+
+        // Initialize the game when page loads
+        window.onload = initializeGame;
+    </script>
+</body>
+</html> 

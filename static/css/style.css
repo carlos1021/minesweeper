@@ -1,0 +1,128 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+.game-container {
+    background-color: #c0c0c0;
+    padding: 20px;
+    border: 3px outset #c0c0c0;
+    border-radius: 5px;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.face-button {
+    width: 50px;
+    height: 50px;
+    border: 2px outset #c0c0c0;
+    background-color: #c0c0c0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.face-button:active {
+    border: 2px inset #c0c0c0;
+}
+
+.difficulty-selector {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.difficulty-button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    background-color: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.difficulty-button:active {
+    border: 2px inset #c0c0c0;
+}
+
+.difficulty-button.active {
+    background-color: #a0a0a0;
+    border: 2px inset #c0c0c0;
+}
+
+.grid {
+    display: grid;
+    gap: 1px;
+    background-color: #808080;
+    border: 3px outset #c0c0c0;
+    padding: 5px;
+}
+
+.tile {
+    width: 30px;
+    height: 30px;
+    border: 2px outset #c0c0c0;
+    background-color: #c0c0c0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.tile:hover {
+    background-color: #d0d0d0;
+}
+
+.tile:active {
+    border: 2px inset #c0c0c0;
+    background-color: #b0b0b0;
+}
+
+.tile.revealed {
+    border: 1px solid #808080;
+    background-color: #c0c0c0;
+}
+
+.tile.revealed.empty {
+    background-color: #a0a0a0;
+}
+
+.tile.mine {
+    background-color: #ff0000;
+}
+
+.controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.reset-button {
+    padding: 10px 20px;
+    background-color: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.reset-button:active {
+    border: 2px inset #c0c0c0;
+}
+
+.game-info {
+    margin-top: 20px;
+    text-align: center;
+} 

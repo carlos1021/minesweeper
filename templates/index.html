@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Minesweeper</h1>
+    
+    <div class="game-container">
+        <div class="header">
+            <div class="face-button" onclick="resetGame()">
+                <img src="{{ url_for('static', filename='media/face_ingame.png') }}" alt="Face" width="40" height="40">
+            </div>
+        </div>
+        
+        <div class="difficulty-selector">
+            <button class="difficulty-button active" onclick="setDifficulty('beginner')">Beginner</button>
+            <button class="difficulty-button" onclick="setDifficulty('intermediate')">Intermediate</button>
+            <button class="difficulty-button" onclick="setDifficulty('expert')">Expert</button>
+        </div>
+        
+        <div class="grid" id="grid"></div>
+        
+        <div class="controls">
+            <button class="reset-button" onclick="resetGame()">Reset Game</button>
+        </div>
+        
+        <div class="game-info">
+            <p>Revealed: <span id="revealed-count">0</span> | Mines: <span id="mine-count">10</span></p>
+            <p id="game-status"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html> 
